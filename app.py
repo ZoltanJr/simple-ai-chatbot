@@ -48,10 +48,6 @@ def generate():
     last_message = session['chat_history'][-1] if session['chat_history'] else {"user": "", "bot": ""}
     
     # With more context GPT-2 can act strange
-    # gpt2_input = f"Emotion: {sentiment_label} Last User message: {last_message['user']} Last Bot response: {last_message['bot']} User message: {user_prompt} Bot Response:"
-    
-    #gpt2_input = f"I am your partner. Moody, Funny, Sassy who jokes a lot. Emotion: {sentiment_label}; Your request: {user_prompt} My response:"
-    #gpt2_input = f"I am Fred. I feel {sentiment_label}. You said {user_prompt}. I respond with "
     gpt2_input = f"You said '{user_prompt}'. I respond with the following: "
     input_tokens = tokenizer.encode(gpt2_input, return_tensors='pt')
 
