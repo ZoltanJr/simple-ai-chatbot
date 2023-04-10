@@ -1,5 +1,6 @@
 # gpt2-chat
 Freestyle chat app built on GPT-2. Have fun!
+You need Google Chrome to support Speech-2-Text functionality and to talk with GPT2 Chat!
 
 (Supported Python version: 3.8)
 
