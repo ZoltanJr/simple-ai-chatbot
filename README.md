@@ -12,7 +12,8 @@ This project was created for personal research and learning purposes.
 - start venv: ```source venv/bin/activate ```
     - exit venv: ```deactivate```
 - install requirements: ```pip install -r requirements.txt```
-- run app: ```python3 app.py```
+- test: ```python3 -m unittest discover```
+- run app: ```flask run``` or ```python3 app.py```
 - open app at at ```http://127.0.0.1:5000/```
 
 
