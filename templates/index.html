@@ -24,7 +24,6 @@
     </div>
     <div id="typing-indicator" style="display:none;">Bot is typing...</div>
     <script>
-        // Extract the message submission logic into this function
         function submitMessageForm() {
             let userPrompt = $("#prompt").val();
             let chatHistoryDiv = $("#chat-history");
@@ -37,7 +36,6 @@
     
             $.post("/generate", { prompt: userPrompt }, function (data) {
 
-                // Disable the "Send" button
                 $("button[type='submit']").prop("disabled", true);
 
                 // Show typing indicator
@@ -49,20 +47,21 @@
                 // Append the new message container to the chat history
                 chatHistoryDiv.append('<div id="' + messageId + '" class="message"><p><strong>Bot: </strong></p></div>');
 
-                var message = data; // Assuming the message is in the 'message' field of the response
-                var typingSpeed = 50; // Adjust this value to control typing speed (in milliseconds)
+                var message = data;
+
+                // Adjust this value to control typing speed (in milliseconds)
+                var typingSpeed = 50;
 
                 // Use the unique ID to select the new message container
                 var messageElement = $("#" + messageId + " p");
                 typeText(messageElement, message, 0, typingSpeed);
 
                 $("#typing-indicator").hide();
-                $("button[type='submit']").prop("disabled", false); // Enable the "Send" button
+                $("button[type='submit']").prop("disabled", false);
                 chatHistoryDiv.scrollTop(chatHistoryDiv.prop("scrollHeight"));
             });
         }
 
-        // Update the form submission event to call the new submit function
         $("#message-form").submit(function (event) {
             event.preventDefault();
             submitMessageForm();
