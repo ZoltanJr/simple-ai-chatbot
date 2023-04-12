@@ -2,7 +2,7 @@
 
 Freestyle chat app built on the pre-trained GPT-2 model(s).
 Please be warned that the bots responses can and will be nonsensical, offensive and factually wrong.
-This project was created for personal research and learning purposes.
+This project was created for personal research and learning purposes. 
 
 
 ## How to use
