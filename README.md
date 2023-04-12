@@ -4,6 +4,7 @@ Please be warned that the bots responses can and will be nonsensical, offensive 
 This project was created for personal research and learning purposes.
 
 
+
 ## How to use
 - open terminal in project root
 - create venv: ```python3 -m venv venv```
@@ -14,9 +15,11 @@ This project was created for personal research and learning purposes.
 - open app at at ```http://127.0.0.1:5000/```
 
 
+
 ## Dockerize and run the container
-- ```docker build -t app-pig-chat .```
-- ```docker run -p 5000:5000 --name app-pig-chat app-pig-chat```
+- build: ```docker build -t app-pig-chat .```
+- run: ```docker run -p 5000:5000 --name app-pig-chat app-pig-chat```
+
 
 
 ## Customization Opportunities
@@ -29,6 +32,7 @@ This project was created for personal research and learning purposes.
     - *add conversation history to observe increasingly chaotic answers*
 - app.py L60: modify gpt2 output restrictions
 - app.py L71-73: change output formatting as you wish
+
 
 
 *Recommended Python version: 3.8*
