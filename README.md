@@ -25,14 +25,14 @@ This project was created for personal research and learning purposes.
 
 ## Customization opportunities
 
-- app.py L20-21: try different gpt2 models
+- app.py ```from_pretrained(«model»)```: try different gpt2 models
     - *gpt2-xl is not recommended on local machine*
-- app.py L23: change output char limit
-- app.py L51: modify gpt2_input
+- app.py ```output_char_limit```: change output char limit
+- app.py ```gpt2_input```: modify model input
     - *observe different patterns in its answers*
     - *pass sentiment_label along to add context*
     - *add conversation history to observe increasingly chaotic answers*
-- app.py L60: modify gpt2 output restrictions
-- app.py L71-73: change output formatting as you wish
+- app.py ```model.generate(«params»)```: modify gpt2 output restrictions
+- app.py search for ```response```: change output formatting and restrictions as you wish
 
 *Recommended Python version: 3.8*
