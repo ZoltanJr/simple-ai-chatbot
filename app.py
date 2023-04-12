@@ -10,15 +10,17 @@ import re
 app = Flask(__name__)
 
 # Set the secret key for sessions
-app.secret_key = "everySessionIsUniq929234"
+app.secret_key = "everySessionIsUnique"
 
 # Configure Flask-Session
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# Load the pre-trained GPT-2 model and tokenizer - use gpt2-large for a better experience
+# Load the pre-trained GPT-2 model and tokenizer. Choose one from these models: gpt2, gpt2-medium, gpt2-large, gpt2-xl
 model = GPT2LMHeadModel.from_pretrained("gpt2")
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+
+output_char_limit = 140
 
 @app.route('/')
 def home():
@@ -57,17 +59,18 @@ def generate():
     outputs = model.generate(
         input_tokens, 
         attention_mask=torch.tensor([attention_mask]),
-        max_length=140,  # Increase max_length to generate longer responses
+        max_length=output_char_limit,  # Increase max_length to generate longer responses
         num_return_sequences=1, 
         no_repeat_ngram_size=2,
         pad_token_id=tokenizer.eos_token_id,  # Set pad_token_id to eos_token_id for open-end generation
     )
 
     response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-    # Remove the input tokens from the generated response
+    
+    # Format generated response
     response = response[len(tokenizer.decode(input_tokens[0])):].strip()
     response = sanitize_text(response)
-    response = truncate_to_last_sentence(response, 140)
+    response = truncate_to_last_sentence(response, output_char_limit)
 
     session['chat_history'].append({'user': user_prompt, 'bot': response})
     session.modified = True
@@ -116,7 +119,6 @@ def sanitize_text(text):
     clean_text = clean_text.replace("】", '')
     clean_text = clean_text.replace("【", '')
     clean_text = clean_text.replace("_", '')
-    clean_text = clean_text.replace("Fred:", '')
     clean_text = clean_text.replace(":", ' ')
 
     return clean_text

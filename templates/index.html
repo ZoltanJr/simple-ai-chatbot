@@ -3,75 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT2 Chat</title>
+    <title>Simple AI Chatbot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
 </head>
 <body>
-    <h1>GPT2 Chat</h1>
+    <h1>Simple AI Chatbot</h1>
     <form id="message-form">
         <label for="prompt">Enter your message:</label>
-        <div class="inline-block">
-            <input type="text" id="prompt" name="prompt" required>
-            <button type="submit">Send</button>
-        </div>
-        <div class="inline-block">
-            <input type="checkbox" id="talk" name="talk">
-            <label for="talk">Tick to Talk</label>
-            <button id="mic-button" type="button">🎤</button>
-        </div>
+        <input type="text" id="prompt" name="prompt" automcomplete="off" required>
+        <button type="submit">Send</button>
     </form>
     <div class="chat-history" id="chat-history">
         {% for message in chat_history %}
             <div class="message">
-                <p><strong>You: </strong>{{ message.user }}</p>
-                <p><strong>GPT2 Chat: </strong>{{ message.bot }}</p>
+                <p><strong>User: </strong>{{ message.user }}</p>
+                <p><strong>Bot: </strong>{{ message.bot }}</p>
             </div>
         {% endfor %}
     </div>
-    <div id="typing-indicator" style="display:none;">GPT2 Chat is typing...</div>
+    <div id="typing-indicator" style="display:none;">Bot is typing...</div>
     <script>
-        const micButton = document.getElementById('mic-button');
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || null)();
-    
-        if (recognition === null) {
-            micButton.disabled = true;
-            console.warn('Speech recognition is not available in your browser.');
-        } else {
-            let isRecording = false;
-    
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-    
-            recognition.onresult = (event) => {
-                const text = event.results[event.results.length - 1][0].transcript;
-                $("#prompt").val(text);
-                submitMessageForm(); // Call the submit function here
-            };
-    
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-            };
-    
-            micButton.onclick = () => {
-                if (isRecording) {
-                    recognition.stop();
-                    micButton.textContent = '🎤';
-                } else {
-                    recognition.start();
-                    micButton.textContent = '⏹️';
-                }
-                isRecording = !isRecording;
-            };
-        }
-    
         // Extract the message submission logic into this function
         function submitMessageForm() {
             let userPrompt = $("#prompt").val();
             let chatHistoryDiv = $("#chat-history");
     
-            chatHistoryDiv.append('<div class="message"><p><strong>You: </strong>' + userPrompt + '</p></div>');
+            chatHistoryDiv.append('<div class="message"><p><strong>User: </strong>' + userPrompt + '</p></div>');
     
             $("#prompt").val("");
             $("#typing-indicator").show();
@@ -89,7 +47,7 @@
                 var messageId = "message-" + Date.now();
 
                 // Append the new message container to the chat history
-                chatHistoryDiv.append('<div id="' + messageId + '" class="message"><p><strong>GPT2 Chat: </strong></p></div>');
+                chatHistoryDiv.append('<div id="' + messageId + '" class="message"><p><strong>Bot: </strong></p></div>');
 
                 var message = data; // Assuming the message is in the 'message' field of the response
                 var typingSpeed = 50; // Adjust this value to control typing speed (in milliseconds)
@@ -101,21 +59,9 @@
                 $("#typing-indicator").hide();
                 $("button[type='submit']").prop("disabled", false); // Enable the "Send" button
                 chatHistoryDiv.scrollTop(chatHistoryDiv.prop("scrollHeight"));
-
-                // Speak the response text if the tickbox is checked
-                if ($("#talk").is(":checked")) {
-                    speakText(data);
-                }
             });
         }
 
-        // Function to speak the text using the SpeechSynthesis API
-        function speakText(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US'; // Set the language
-            window.speechSynthesis.speak(msg); // Speak the text
-        }
-    
         // Update the form submission event to call the new submit function
         $("#message-form").submit(function (event) {
             event.preventDefault();
