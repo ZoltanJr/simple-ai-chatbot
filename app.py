@@ -8,15 +8,11 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import re
 
 app = Flask(__name__)
-
-# Set the secret key for sessions
 app.secret_key = "everySessionIsUnique"
-
-# Configure Flask-Session
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# Load the pre-trained GPT-2 model and tokenizer. Choose one from these models: gpt2, gpt2-medium, gpt2-large, gpt2-xl
+# gpt2, gpt2-medium, gpt2-large, gpt2-xl
 model = GPT2LMHeadModel.from_pretrained("gpt2")
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
@@ -36,7 +32,6 @@ def generate():
     user_prompt = request.form['prompt']
     user_prompt = sanitize_text(user_prompt)
 
-    # Analyze the sentiment of the user's input
     sentiment_analyzer = SentimentIntensityAnalyzer()
     sentiment = sentiment_analyzer.polarity_scores(user_prompt)
     sentiment_label = "neutral"
@@ -46,28 +41,22 @@ def generate():
     elif sentiment["compound"] <= -0.05:
         sentiment_label = "negative"
 
-    # Create GPT-2 input with the last user message and bot message
     last_message = session['chat_history'][-1] if session['chat_history'] else {"user": "", "bot": ""}
-    
-    # With more context GPT-2 can act strange
     gpt2_input = f"You said '{user_prompt}'. I respond with the following: "
     input_tokens = tokenizer.encode(gpt2_input, return_tensors='pt')
-
-    # Create attention_mask for input tokens
     attention_mask = [1] * len(input_tokens[0])
 
     outputs = model.generate(
         input_tokens, 
         attention_mask=torch.tensor([attention_mask]),
-        max_length=output_char_limit,  # Increase max_length to generate longer responses
+        max_length=output_char_limit,
         num_return_sequences=1, 
         no_repeat_ngram_size=2,
-        pad_token_id=tokenizer.eos_token_id,  # Set pad_token_id to eos_token_id for open-end generation
+        pad_token_id=tokenizer.eos_token_id
     )
 
     response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
     
-    # Format generated response
     response = response[len(tokenizer.decode(input_tokens[0])):].strip()
     response = sanitize_text(response)
     response = truncate_to_last_sentence(response, output_char_limit)
