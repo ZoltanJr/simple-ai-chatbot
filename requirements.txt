@@ -4,3 +4,4 @@ transformers
 yake
 vaderSentiment==3.3.2
 torch
+Flask-Testing
