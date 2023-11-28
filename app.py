@@ -14,8 +14,8 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 # Choose from: gpt2, gpt2-medium, gpt2-large, gpt2-xl
-model = GPT2LMHeadModel.from_pretrained("gpt2")
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("gpt2-large")
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2-large")
 
 output_char_limit = 140
 
