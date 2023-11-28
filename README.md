@@ -34,3 +34,7 @@ This project was created for personal research and learning purposes.
 - ```response```: change output formatting and restrictions as you wish
 
 *Recommended Python version: 3.8*
+
+pyenv global 3.8
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
