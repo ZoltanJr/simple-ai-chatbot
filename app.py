@@ -1,20 +1,21 @@
 import os
 import torch
+import re
 from flask import Flask, request, render_template, jsonify, session
 from flask_session import Session
+from dotenv import load_dotenv
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
-import yake
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import re
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "everySessionIsUnique"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# gpt2, gpt2-medium, gpt2-large, gpt2-xl
-model = GPT2LMHeadModel.from_pretrained("gpt2")
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+# Choose from: gpt2, gpt2-medium, gpt2-large, gpt2-xl
+model = GPT2LMHeadModel.from_pretrained("gpt2-large")
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2-large")
 
 output_char_limit = 140
 
@@ -32,15 +33,6 @@ def generate():
     user_prompt = request.form['prompt']
     user_prompt = sanitize_text(user_prompt)
 
-    sentiment_analyzer = SentimentIntensityAnalyzer()
-    sentiment = sentiment_analyzer.polarity_scores(user_prompt)
-    sentiment_label = "neutral"
-
-    if sentiment["compound"] >= 0.05:
-        sentiment_label = "positive"
-    elif sentiment["compound"] <= -0.05:
-        sentiment_label = "negative"
-
     last_message = session['chat_history'][-1] if session['chat_history'] else {"user": "", "bot": ""}
     gpt2_input = f"You said '{user_prompt}'. I respond with the following: "
     input_tokens = tokenizer.encode(gpt2_input, return_tensors='pt')
@@ -55,11 +47,15 @@ def generate():
         pad_token_id=tokenizer.eos_token_id
     )
 
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-    
-    response = response[len(tokenizer.decode(input_tokens[0])):].strip()
-    response = sanitize_text(response)
-    response = truncate_to_last_sentence(response, output_char_limit)
+    response = truncate_to_last_sentence(
+        sanitize_text(
+            tokenizer.decode(outputs[0], skip_special_tokens=True)
+            .strip()[len(tokenizer.decode(input_tokens[0])):]
+            .strip()
+        ), 
+        output_char_limit
+    )
+
 
     session['chat_history'].append({'user': user_prompt, 'bot': response})
     session.modified = True
@@ -82,35 +78,21 @@ def truncate_to_last_sentence(text, char_limit):
         return truncated_text[:last_sentence_end + 1]
 
 def sanitize_text(text):
-    # Remove HTML tags and attributes
-    clean_text = re.sub('<[^<]+?>', '', text)
+    patterns = [
+        '<[^<]+?>',
+        '<script[^>]*>.*?</script>',
+        '<style[^>]*>.*?</style>',
+        '<!--.*?-->'
+    ]
+    
+    for pattern in patterns:
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
+    
+    special_chars = ['&', '<', '>', '"', "'", "[", "]", "{", "}", "】", "【", "_", ":"]
+    for char in special_chars:
+        text = text.replace(char, '')
 
-    # Remove JavaScript code
-    clean_text = re.sub('<script[^>]*>.*?</script>', '', clean_text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
-
-    # Remove CSS code
-    clean_text = re.sub('<style[^>]*>.*?</style>', '', clean_text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
-
-    # Remove comments
-    clean_text = re.sub('<!--.*?-->', '', clean_text, flags=re.DOTALL)
-
-    # Replace special characters
-    clean_text = clean_text.replace('&', '')
-    clean_text = clean_text.replace('<', '')
-    clean_text = clean_text.replace('>', '')
-    clean_text = clean_text.replace('"', '')
-    clean_text = clean_text.replace("'", '')
-    clean_text = clean_text.replace("[", '')
-    clean_text = clean_text.replace("]", '')
-    clean_text = clean_text.replace("{", '')
-    clean_text = clean_text.replace("}", '')
-    clean_text = clean_text.replace("}", '')
-    clean_text = clean_text.replace("】", '')
-    clean_text = clean_text.replace("【", '')
-    clean_text = clean_text.replace("_", '')
-    clean_text = clean_text.replace(":", ' ')
-
-    return clean_text
+    return text
 
 if __name__ == '__main__':
     app.run(debug=True)
